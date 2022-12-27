@@ -74,6 +74,10 @@ end
 
 function start(switch)
     TriggerServerEvent("Ayse:GetCharacters")
+    if not started then
+        TriggerServerEvent("Ayse_CharacterSelection:checkPerms")
+        started = true
+    end
     if switch then
         local ped = PlayerPedId()
         SwitchOutPlayer(ped, 0, 1)
@@ -94,6 +98,13 @@ AddEventHandler("playerSpawned", function()
     start(true)
 end)
 
+RegisterNetEvent("Ayse_CharacterSelection:permsChecked", function(allowedRoles)
+    SendNUIMessage({
+        type = "givePerms",
+        deptRoles = json.encode(allowedRoles)
+    })
+end)
+
 RegisterNetEvent("Ayse:returnCharacters", function(characters)
     local playerCharacters = {}
     for id, characterInfo in pairs(characters) do
@@ -109,9 +120,15 @@ end)
 RegisterNUICallback("setMainCharacter", function(data)
     local characters = AyseCore.Functions.GetCharacters()
     local defaultSpawns = config.spawns["DEFAULT"]
+    local jobSpawns = config.spawns[characters[data.id].job]
     local spawns = {}
     for _, spawn in pairs(defaultSpawns) do
         spawns[#spawns + 1] = spawn
+    end
+    if jobSpawns then
+        for _, newSpawn in pairs(jobSpawns) do
+            spawns[#spawns + 1] = newSpawn
+        end
     end
     SendNUIMessage({
         type = "setSpawns",
@@ -129,6 +146,7 @@ RegisterNUICallback("newCharacter", function(data)
             lastName = data.lastName,
             dob = data.dateOfBirth,
             gender = data.gender,
+            job = data.department,
             cash = data.startingCash,
             bank = data.startingBank
         })
@@ -141,7 +159,8 @@ RegisterNUICallback("editCharacter", function(data)
         firstName = data.firstName,
         lastName = data.lastName,
         dob = data.dateOfBirth,
-        gender = data.gender
+        gender = data.gender,
+        job = data.department
     })
 end)
 
