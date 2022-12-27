@@ -1,6 +1,6 @@
 author "helmimarif"
 description "AyseFramework Character Selection"
-version "1.0"
+version "2.0"
 
 fx_version "cerulean"
 game "gta5"
