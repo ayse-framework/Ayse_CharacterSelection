@@ -97,21 +97,29 @@ $(function() {
             $("#tpDoNot").html(`<a class="fas fa-compass" style="color:white;"></a> Do not teleport`)
         }
 
+        if (item.type === "givePerms") {
+            JSON.parse(item.deptRoles).forEach((dept) => {
+                $(".departments").append($("<option>", {
+                    text: dept
+                }));
+            });
+        }
+
         if (item.type === "refresh") {
             $("#charactersSection").empty();
             characterCreatorMenu(false);
             let characters = JSON.parse(item.characters)
             Object.keys(characters).forEach((id) => {
-                createCharacter(characters[id].firstName, characters[id].lastName, characters[id].dob, characters[id].gender, characters[id].cash, characters[id].bank, characters[id].id);
+                createCharacter(characters[id].firstName, characters[id].lastName, characters[id].dob, characters[id].gender, characters[id].job, characters[id].cash, characters[id].bank, characters[id].id);
             });
         }
     })
 
-    function createCharacter(firstName, lastName, dateOfBirth, gender, startingCash, startingBank, id) {
-        if ((firstName.length + lastName.length) > 24) {
-            $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton animated"><span>${firstName} ${lastName} </span></button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
+    function createCharacter(firstName, lastName, dateOfBirth, gender, department, startingCash, startingBank, id) {
+        if ((firstName.length + lastName.length + department.length) > 24) {
+            $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton animated"><span>${firstName} ${lastName} (${department})</span></button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
         } else {
-            $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton"><span>${firstName} ${lastName} </span></button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
+            $("#charactersSection").append(`<button id="characterButton${id}" class="createdButton"><span>${firstName} ${lastName} (${department})</span></button><button id="characterButtonEdit${id}" class="createdButtonEdit"><a class="fas fa-edit"></a> Edit</button><button id="characterButtonDelete${id}" class="createdButtonDelete"><a class="fas fa-trash-alt"></a> Delete</button>`);
         }
         $(`#characterButton${id}`).click(function() {
             spawnMenu(true)
@@ -126,6 +134,7 @@ $(function() {
             $("#newLastName").val(lastName);
             $("#newDateOfBirth").val(dateOfBirth);
             $("#newGender").val(gender);
+            $("#newDepartment").val(department);
             characterEdited = id
             return;
         });
@@ -142,6 +151,7 @@ $(function() {
             lastName: $("#lastName").val(),
             dateOfBirth: $("#dateOfBirth").val(),
             gender: $("#gender").val(),
+            department: $("#department").val(),
             startingCash: $("#startingCash").val(),
             startingBank: $("#startingBank").val()
         }));
@@ -157,6 +167,7 @@ $(function() {
             lastName: $("#newLastName").val(),
             dateOfBirth: $("#newDateOfBirth").val(),
             gender: $("#newGender").val(),
+            department: $("#newDepartment").val(),
             id: characterEdited
         }));
         return false;
