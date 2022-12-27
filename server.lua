@@ -1,9 +1,27 @@
 AyseCore = exports["Ayse_Core"]:GetCoreObject()
 
+function validateDepartment(player, department)
+    local departmentExists = config.departments[department]
+    if departmentExists then
+        local discordUserId = AyseCore.Functions.GetPlayerIdentifierFromType("discord", player):gsub("discord:", "")
+        local discordInfo = AyseCore.Functions.GetUserDiscordInfo(discordUserId)
+
+        for _, roleId in pairs(departmentExists) do
+            if roleId == 0 or roleId == "0" or (discordInfo and discordInfo.roles[roleId]) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 RegisterNetEvent("Ayse_CharacterSelection:newCharacter", function(newCharacter)
     local player = source
 
-    AyseCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.cash, newCharacter.bank)
+    local departmentCheck = validateDepartment(player, newCharacter.job)
+    if not departmentCheck then return end
+
+    AyseCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.job, newCharacter.cash, newCharacter.bank)
 end)
 
 RegisterNetEvent("Ayse_CharacterSelection:editCharacter", function(newCharacter)
@@ -11,8 +29,43 @@ RegisterNetEvent("Ayse_CharacterSelection:editCharacter", function(newCharacter)
 
     local characters = AyseCore.Functions.GetPlayerCharacters(player)
     if not characters[newCharacter.id] then return end
-    
-    AyseCore.Functions.UpdateCharacterData(newCharacter.id, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender)
+
+    local departmentCheck = validateDepartment(player, newCharacter.job)
+    if not departmentCheck then return end
+
+    AyseCore.Functions.UpdateCharacterData(newCharacter.id, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.job)
 
     TriggerClientEvent("Ayse:returnCharacters", player, AyseCore.Functions.GetPlayerCharacters(player))
 end)
+
+RegisterNetEvent("Ayse_CharacterSelection:checkPerms", function()
+    local player = source
+    local discordUserId = AyseCore.Functions.GetPlayerIdentifierFromType("discord", player):gsub("discord:", "")
+    local allowedRoles = {}
+    local discordInfo = AyseCore.Functions.GetUserDiscordInfo(discordUserId)
+
+    for dept, roleTable in pairs(config.departments) do
+        for _, roleId in pairs(roleTable) do
+            if roleId == 0 or roleId == "0" or (discordInfo and discordInfo.roles[roleId]) then
+                table.insert(allowedRoles, dept)
+            end
+        end
+    end
+    TriggerClientEvent("Ayse_CharacterSelection:permsChecked", player, allowedRoles)
+end)
+
+if config.departmentPaychecks then
+    CreateThread(function()
+        while true do
+            Wait(config.paycheckInterval * 60000)
+            for player, playerInfo in pairs(AyseCore.Functions.GetPlayers()) do
+                local salary = config.departmentSalaries[playerInfo.job]
+                AyseCore.Functions.AddMoney(salary, player, "bank")
+                --TriggerClientEvent("chat:addMessage", player, {
+                --    color = {0, 255, 0},
+                --    args = {"Salary", "Received $" .. salary .. "."}
+                --})
+            end
+        end
+    end)
+end
