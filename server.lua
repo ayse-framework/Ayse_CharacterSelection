@@ -21,7 +21,8 @@ RegisterNetEvent("Ayse_CharacterSelection:newCharacter", function(newCharacter)
     local departmentCheck = validateDepartment(player, newCharacter.job)
     if not departmentCheck then return end
 
-    AyseCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.job, newCharacter.cash, newCharacter.bank)
+    local characterId = NDCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.cash, newCharacter.bank)
+    AyseCore.Functions.SetPlayerJob(characterId, newCharacter.job, 1)
 end)
 
 RegisterNetEvent("Ayse_CharacterSelection:editCharacter", function(newCharacter)
@@ -33,7 +34,8 @@ RegisterNetEvent("Ayse_CharacterSelection:editCharacter", function(newCharacter)
     local departmentCheck = validateDepartment(player, newCharacter.job)
     if not departmentCheck then return end
 
-    AyseCore.Functions.UpdateCharacterData(newCharacter.id, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.job)
+    AyseCore.Functions.UpdateCharacter(newCharacter.id, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender)
+    AyseCore.Functions.SetPlayerData(newCharacter.id, "job", newCharacter.job, 1)
 
     TriggerClientEvent("Ayse:returnCharacters", player, AyseCore.Functions.GetPlayerCharacters(player))
 end)
@@ -60,11 +62,13 @@ if config.departmentPaychecks then
             Wait(config.paycheckInterval * 60000)
             for player, playerInfo in pairs(AyseCore.Functions.GetPlayers()) do
                 local salary = config.departmentSalaries[playerInfo.job]
-                AyseCore.Functions.AddMoney(salary, player, "bank")
-                --TriggerClientEvent("chat:addMessage", player, {
-                --    color = {0, 255, 0},
-                --    args = {"Salary", "Received $" .. salary .. "."}
-                --})
+                if salary then
+                    AyseCore.Functions.AddMoney(salary, player, "bank")
+                    TriggerClientEvent("chat:addMessage", player, {
+                        color = {0, 255, 0},
+                        args = {"Salary", "Received $" .. salary .. "."}
+                    })
+                end
             end
         end
     end)
