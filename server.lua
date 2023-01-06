@@ -21,7 +21,7 @@ RegisterNetEvent("Ayse_CharacterSelection:newCharacter", function(newCharacter)
     local departmentCheck = validateDepartment(player, newCharacter.job)
     if not departmentCheck then return end
 
-    AyseCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, newCharacter.cash, newCharacter.bank, function(characterId)
+    AyseCore.Functions.CreateCharacter(player, newCharacter.firstName, newCharacter.lastName, newCharacter.dob, newCharacter.gender, function(characterId)
         AyseCore.Functions.SetPlayerJob(characterId, newCharacter.job, 1)
     end)
 end)
