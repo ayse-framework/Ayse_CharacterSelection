@@ -110,7 +110,7 @@ $(function() {
             characterCreatorMenu(false);
             let characters = JSON.parse(item.characters)
             Object.keys(characters).forEach((id) => {
-                createCharacter(characters[id].firstName, characters[id].lastName, characters[id].dob, characters[id].gender, characters[id].job, characters[id].id);
+                createCharacter(characters[id].firstName || "", characters[id].lastName || "", characters[id].dob || "", characters[id].gender || "", characters[id].job || "", characters[id].id || "");
             });
         }
     })
@@ -151,12 +151,10 @@ $(function() {
             lastName: $("#lastName").val(),
             dateOfBirth: $("#dateOfBirth").val(),
             gender: $("#gender").val(),
-            department: $("#department").val(),
-            startingCash: $("#startingCash").val(),
-            startingBank: $("#startingBank").val()
+            department: $("#department").val()
         }));
         characterCreatorMenu(false)
-        $("#firstName, #lastName, #dateOfBirth, #startingCash, #startingBank").val("")
+        $("#firstName, #lastName, #dateOfBirth").val("")
         return false;
     });
 
